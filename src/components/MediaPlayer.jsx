@@ -1,0 +1,223 @@
+import { useState, useRef, useEffect } from 'react';
+import { X, Play, Pause, Volume2, VolumeX, Maximize, Download } from 'lucide-react';
+import { downloadFile } from '../utils/download';
+
+const MediaPlayer = ({ media, onClose }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+  const mediaRef = useRef(null);
+
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === ' ') {
+        e.preventDefault();
+        togglePlay();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [onClose]);
+
+  const togglePlay = () => {
+    if (mediaRef.current) {
+      if (isPlaying) {
+        mediaRef.current.pause();
+      } else {
+        mediaRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (mediaRef.current) {
+      setCurrentTime(mediaRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (mediaRef.current) {
+      setDuration(mediaRef.current.duration);
+    }
+  };
+
+  const handleSeek = (e) => {
+    const seekTime = (e.target.value / 100) * duration;
+    if (mediaRef.current) {
+      mediaRef.current.currentTime = seekTime;
+      setCurrentTime(seekTime);
+    }
+  };
+
+  const handleVolumeChange = (e) => {
+    const newVolume = e.target.value / 100;
+    setVolume(newVolume);
+    if (mediaRef.current) {
+      mediaRef.current.volume = newVolume;
+    }
+    setIsMuted(newVolume === 0);
+  };
+
+  const toggleMute = () => {
+    if (mediaRef.current) {
+      mediaRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const toggleFullscreen = () => {
+    if (mediaRef.current) {
+      if (mediaRef.current.requestFullscreen) {
+        mediaRef.current.requestFullscreen();
+      }
+    }
+  };
+
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const handleDownload = () => {
+    const filename = `${media.title.replace(/\s+/g, '-').toLowerCase()}.${
+      media.type === 'video' ? 'mp4' : 'mp3'
+    }`;
+    downloadFile(media.url, filename);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 animate-fade-in">
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 text-white hover:text-accent-500 transition-colors z-10"
+      >
+        <X className="w-8 h-8" />
+      </button>
+
+      <div className="w-full max-w-4xl">
+        <div className="bg-dark-800 rounded-2xl overflow-hidden border border-dark-600">
+          {media.type === 'video' ? (
+            <video
+              ref={mediaRef}
+              src={media.url}
+              onTimeUpdate={handleTimeUpdate}
+              onLoadedMetadata={handleLoadedMetadata}
+              onEnded={() => setIsPlaying(false)}
+              className="w-full aspect-video bg-black"
+              onClick={togglePlay}
+            />
+          ) : (
+            <div className="relative aspect-video bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 flex items-center justify-center">
+              <audio
+                ref={mediaRef}
+                src={media.url}
+                onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={handleLoadedMetadata}
+                onEnded={() => setIsPlaying(false)}
+              />
+              <div className="text-center">
+                <div className="w-32 h-32 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center mb-6">
+                  <Volume2 className="w-16 h-16 text-white" />
+                </div>
+                <h3 className="text-3xl font-bold text-white mb-2">{media.title}</h3>
+                <p className="text-white/70 text-lg">Audio Track</p>
+              </div>
+            </div>
+          )}
+
+          <div className="p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-2xl font-bold text-white">{media.title}</h3>
+              <button
+                onClick={handleDownload}
+                className="flex items-center space-x-2 bg-accent-500 hover:bg-accent-600 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                <Download className="w-5 h-5" />
+                <span>Download</span>
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={(currentTime / duration) * 100 || 0}
+                onChange={handleSeek}
+                className="w-full h-2 bg-dark-600 rounded-lg appearance-none cursor-pointer slider"
+                style={{
+                  background: `linear-gradient(to right, #10b981 0%, #10b981 ${(currentTime / duration) * 100}%, #2f2f2f ${(currentTime / duration) * 100}%, #2f2f2f 100%)`
+                }}
+              />
+              <div className="flex justify-between text-sm text-gray-400">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={togglePlay}
+                  className="w-12 h-12 bg-accent-500 hover:bg-accent-600 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  {isPlaying ? <Pause className="w-6 h-6" fill="white" /> : <Play className="w-6 h-6" fill="white" />}
+                </button>
+
+                <div className="flex items-center space-x-2">
+                  <button onClick={toggleMute} className="text-gray-400 hover:text-white transition-colors">
+                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                  </button>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={isMuted ? 0 : volume * 100}
+                    onChange={handleVolumeChange}
+                    className="w-24 h-1 bg-dark-600 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {media.type === 'video' && (
+                <button
+                  onClick={toggleFullscreen}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <Maximize className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        input[type="range"]::-webkit-slider-thumb {
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          background: #10b981;
+          border-radius: 50%;
+          cursor: pointer;
+        }
+        input[type="range"]::-moz-range-thumb {
+          width: 16px;
+          height: 16px;
+          background: #10b981;
+          border-radius: 50%;
+          cursor: pointer;
+          border: none;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default MediaPlayer;
