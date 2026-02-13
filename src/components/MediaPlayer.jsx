@@ -92,16 +92,16 @@ const MediaPlayer = ({ media, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 animate-fade-in">
+    <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-2 sm:p-4 animate-fade-in overflow-y-auto">
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 text-white hover:text-accent-500 transition-colors z-10"
+        className="absolute top-2 right-2 sm:top-4 sm:right-4 text-white hover:text-accent-500 transition-colors z-10 bg-dark-800/50 rounded-full p-2"
       >
-        <X className="w-8 h-8" />
+        <X className="w-6 h-6 sm:w-8 sm:h-8" />
       </button>
 
-      <div className="w-full max-w-4xl">
-        <div className="bg-dark-800 rounded-2xl overflow-hidden border border-dark-600">
+      <div className="w-full max-w-4xl my-auto">
+        <div className="bg-dark-800 rounded-xl sm:rounded-2xl overflow-hidden border border-dark-600">
           {media.type === 'video' ? (
             <video
               ref={mediaRef}
@@ -121,24 +121,24 @@ const MediaPlayer = ({ media, onClose }) => {
                 onLoadedMetadata={handleLoadedMetadata}
                 onEnded={() => setIsPlaying(false)}
               />
-              <div className="text-center">
-                <div className="w-32 h-32 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center mb-6">
-                  <Volume2 className="w-16 h-16 text-white" />
+              <div className="text-center px-4">
+                <div className="w-20 h-20 sm:w-32 sm:h-32 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center mb-4 sm:mb-6 mx-auto">
+                  <Volume2 className="w-10 h-10 sm:w-16 sm:h-16 text-white" />
                 </div>
-                <h3 className="text-3xl font-bold text-white mb-2">{media.title}</h3>
-                <p className="text-white/70 text-lg">Audio Track</p>
+                <h3 className="text-xl sm:text-3xl font-bold text-white mb-2">{media.title}</h3>
+                <p className="text-white/70 text-sm sm:text-lg">Audio Track</p>
               </div>
             </div>
           )}
 
-          <div className="p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-2xl font-bold text-white">{media.title}</h3>
+          <div className="p-3 sm:p-6 space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <h3 className="text-lg sm:text-2xl font-bold text-white truncate max-w-full sm:max-w-md">{media.title}</h3>
               <button
                 onClick={handleDownload}
-                className="flex items-center space-x-2 bg-accent-500 hover:bg-accent-600 text-white px-4 py-2 rounded-lg transition-colors"
+                className="flex items-center justify-center space-x-2 bg-accent-500 hover:bg-accent-600 text-white px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm sm:text-base w-full sm:w-auto"
               >
-                <Download className="w-5 h-5" />
+                <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Download</span>
               </button>
             </div>
@@ -150,29 +150,29 @@ const MediaPlayer = ({ media, onClose }) => {
                 max="100"
                 value={(currentTime / duration) * 100 || 0}
                 onChange={handleSeek}
-                className="w-full h-2 bg-dark-600 rounded-lg appearance-none cursor-pointer slider"
+                className="w-full h-1.5 sm:h-2 bg-dark-600 rounded-lg appearance-none cursor-pointer slider"
                 style={{
                   background: `linear-gradient(to right, #10b981 0%, #10b981 ${(currentTime / duration) * 100}%, #2f2f2f ${(currentTime / duration) * 100}%, #2f2f2f 100%)`
                 }}
               />
-              <div className="flex justify-between text-sm text-gray-400">
+              <div className="flex justify-between text-xs sm:text-sm text-gray-400">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
               </div>
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 sm:space-x-4">
                 <button
                   onClick={togglePlay}
-                  className="w-12 h-12 bg-accent-500 hover:bg-accent-600 rounded-full flex items-center justify-center text-white transition-colors"
+                  className="w-10 h-10 sm:w-12 sm:h-12 bg-accent-500 hover:bg-accent-600 rounded-full flex items-center justify-center text-white transition-colors"
                 >
-                  {isPlaying ? <Pause className="w-6 h-6" fill="white" /> : <Play className="w-6 h-6" fill="white" />}
+                  {isPlaying ? <Pause className="w-5 h-5 sm:w-6 sm:h-6" fill="white" /> : <Play className="w-5 h-5 sm:w-6 sm:h-6" fill="white" />}
                 </button>
 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 sm:space-x-2">
                   <button onClick={toggleMute} className="text-gray-400 hover:text-white transition-colors">
-                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                    {isMuted ? <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" /> : <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />}
                   </button>
                   <input
                     type="range"
@@ -180,7 +180,7 @@ const MediaPlayer = ({ media, onClose }) => {
                     max="100"
                     value={isMuted ? 0 : volume * 100}
                     onChange={handleVolumeChange}
-                    className="w-24 h-1 bg-dark-600 rounded-lg appearance-none cursor-pointer"
+                    className="w-16 sm:w-24 h-1 bg-dark-600 rounded-lg appearance-none cursor-pointer"
                   />
                 </div>
               </div>
@@ -190,7 +190,7 @@ const MediaPlayer = ({ media, onClose }) => {
                   onClick={toggleFullscreen}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  <Maximize className="w-5 h-5" />
+                  <Maximize className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               )}
             </div>
